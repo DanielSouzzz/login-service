@@ -3,6 +3,7 @@ package br.com.agendapro.projeto.controller;
 import br.com.agendapro.projeto.DAO.IUsuario;
 import br.com.agendapro.projeto.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.swing.text.html.Option;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/users")
 public class UserController {
 
@@ -17,31 +19,31 @@ public class UserController {
     private IUsuario dao;
 
     @GetMapping
-    public List<User> ListUser (){
-        return (List<User>)dao.findAll();
+    public ResponseEntity<List<User>> ListUser (){
+        List<User> lista = (List<User>) dao.findAll();
+        return ResponseEntity.status(200).body(lista);
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user){
+    public ResponseEntity<User> createUser(@RequestBody User user){
         User newUser = dao.save(user);
-        return newUser;
+        return ResponseEntity.status(201).body(newUser);
     }
 
     @PutMapping
-    public User updateUser (@RequestBody User user){
+    public ResponseEntity<User> updateUser (@RequestBody User user){
         User editUser = dao.save(user);
-        return editUser;
+        return ResponseEntity.status(201).body(editUser);
     }
 
     @DeleteMapping("/{id}")
-    public User deleteUser (@PathVariable Integer id) throws NoSuchFieldException {
+    public ResponseEntity<?> deleteUser (@PathVariable Integer id) {
         Optional<User> userOptional = dao.findById(id);
         if (userOptional.isPresent()) {
-            User delUser = userOptional.get();
             dao.deleteById(id);
-            return delUser;
-        }else {
-            throw new NoSuchFieldException("User not found with id: " + id);
+            return ResponseEntity.status(204).build();
+        } else {
+            return ResponseEntity.status(404).build();
         }
     }
 }
