@@ -17,7 +17,7 @@ public class UserSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/users").permitAll()
                 .anyRequest().authenticated()
                 .and().cors();
-        http.addFilterBefore(new UsersecurityFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new UsersecurityFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

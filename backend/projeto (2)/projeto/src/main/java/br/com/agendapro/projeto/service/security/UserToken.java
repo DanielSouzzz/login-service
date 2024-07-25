@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.Token;
 public class UserToken {
     private String token;
 
-    public Token(String token){
+    public UserToken(String token){
         super();
         this.token = token;
     }
