@@ -1,7 +1,11 @@
 package br.com.agendapro.projeto.service;
 
 import br.com.agendapro.projeto.model.User;
+import br.com.agendapro.projeto.model.dto.UserDTO;
 import br.com.agendapro.projeto.repository.IUsuario;
+import br.com.agendapro.projeto.service.security.UserToken;
+import br.com.agendapro.projeto.service.security.UserTokenUtil;
+import jakarta.validation.Valid;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +20,17 @@ public class UserService {
     public UserService(IUsuario repository){
         this.userRepository = repository;
         this.userPasswordEncoder = new BCryptPasswordEncoder();
+    }
+
+    public UserToken tokenGenerate(@Valid UserDTO user) {
+        User user1 = userRepository.findBynameOrEmail(user.getName(), user.getEmail());
+        if (user1 == null) {
+            boolean valid = userPasswordEncoder.matches(user.getPassword(), user1.getPassword());
+            if (valid) {
+                return new UserToken(UserTokenUtil.createToken(user1));
+            }
+        }
+        return null;
     }
 
     public List<User> listUser() {

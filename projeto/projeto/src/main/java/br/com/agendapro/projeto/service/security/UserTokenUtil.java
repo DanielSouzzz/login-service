@@ -20,11 +20,11 @@ public class UserTokenUtil {
     private static final String SECRET_KEY = "toGnORnag@NAL@cIRGI3Daligp5TEMEN";
     private static final String EMISSOR = "DevNice";
 
-    private static String createToken(User user){
+    public static String createToken(User user){
         Key secretKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
         String token = Jwts.builder()
-                .setSubject(user.getUsername())
+                .setSubject(user.getName())
                 .setIssuer(EMISSOR)
                 .setExpiration(new Date((System.currentTimeMillis() + EXPIRATION)))
                 .signWith(secretKey, SignatureAlgorithm.HS256)

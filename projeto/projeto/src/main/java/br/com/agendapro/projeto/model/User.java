@@ -19,8 +19,8 @@ public class User {
 
     @NotBlank(message = "name is mandatory")
     @Size(min = 3, message = "the name must have at least 3 characters")
-    @Column(name = "username", length = 200, nullable = false)
-    private String username;
+    @Column(name = "name", length = 200, nullable = false)
+    private String name;
 
     @Email(message = "invalid email")
     @NotBlank(message = "email is mandatory")

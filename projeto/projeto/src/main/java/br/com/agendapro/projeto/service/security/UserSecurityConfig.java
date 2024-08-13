@@ -14,7 +14,7 @@ public class UserSecurityConfig {
         http
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers(HttpMethod.GET, "/users").permitAll()
+                .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
                 .anyRequest().authenticated()
                 .and().cors();
         http.addFilterBefore(new UsersecurityFilter(), UsernamePasswordAuthenticationFilter.class);

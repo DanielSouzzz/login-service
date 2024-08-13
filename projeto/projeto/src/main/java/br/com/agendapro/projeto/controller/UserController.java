@@ -1,8 +1,10 @@
 package br.com.agendapro.projeto.controller;
 
 import br.com.agendapro.projeto.model.User;
+import br.com.agendapro.projeto.model.dto.UserDTO;
 import br.com.agendapro.projeto.service.UserService;
 
+import br.com.agendapro.projeto.service.security.UserToken;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,12 +56,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> authenticate(@Valid @RequestBody User user){
-        Boolean validateUser = userService.validatePassword(user);
-        if(!validateUser) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<UserToken> logar(@Valid @RequestBody UserDTO user){
+        UserToken token = userService.tokenGenerate(user);
+        if(token != null) {
+            return ResponseEntity.ok(token);
         }
-        return ResponseEntity.status(200).build();
+        return ResponseEntity.status(403).build();
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
