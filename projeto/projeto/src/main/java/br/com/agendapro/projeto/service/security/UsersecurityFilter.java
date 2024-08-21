@@ -21,7 +21,7 @@ public class UsersecurityFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null) {
-            // Adicione logs para verificar o valor do cabeçalho Authorization
+            // logs para verificar o valor do cabeçalho Authorization
             System.out.println("Authorization Header: " + authHeader);
 
             UsernamePasswordAuthenticationToken auth = UserTokenUtil.validate(request);

@@ -24,7 +24,7 @@ public class UserService {
 
     public UserToken tokenGenerate(@Valid UserDTO user) {
         User user1 = userRepository.findBynameOrEmail(user.getName(), user.getEmail());
-        if (user1 == null) {
+        if (user1 != null) {
             boolean valid = userPasswordEncoder.matches(user.getPassword(), user1.getPassword());
             if (valid) {
                 return new UserToken(UserTokenUtil.createToken(user1));
