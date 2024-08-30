@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -17,7 +18,7 @@ public class UsersecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        if (request.getRequestURI().equals("/users/login")) { // se o endpoint for de login, não exige hearders
+        /*if (request.getRequestURI().equals("/users/login")) { // se o endpoint for de login, não exige hearders
             filterChain.doFilter(request, response);
             return;
         }
@@ -26,9 +27,7 @@ public class UsersecurityFilter extends OncePerRequestFilter {
         if (authHeader != null) {
             // logs para verificar o valor do cabeçalho Authorization
             System.out.println("Authorization Header: " + authHeader);
-
             UsernamePasswordAuthenticationToken auth = UserTokenUtil.validate(request);
-
             // logs para verificar o token de autenticação
             System.out.println("Authenticated Token: " + auth);
 
@@ -41,6 +40,12 @@ public class UsersecurityFilter extends OncePerRequestFilter {
             System.out.println("No Authorization Header");
         }
 
+        filterChain.doFilter(request, response);
+    }*/
+        if (request.getHeader("Authorization") != null) {
+        Authentication auth = UserTokenUtil.validate(request);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        }
         filterChain.doFilter(request, response);
     }
 }

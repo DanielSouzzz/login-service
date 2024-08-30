@@ -14,8 +14,8 @@ import java.util.List;
 
 @Service
 public class UserService {
-    private IUsuario userRepository;
-    private PasswordEncoder userPasswordEncoder;
+    private final IUsuario userRepository;
+    private final PasswordEncoder userPasswordEncoder;
 
     public UserService(IUsuario repository){
         this.userRepository = repository;
@@ -23,11 +23,11 @@ public class UserService {
     }
 
     public UserToken tokenGenerate(@Valid UserDTO user) {
-        User user1 = userRepository.findBynameOrEmail(user.getName(), user.getEmail());
-        if (user1 != null) {
-            boolean valid = userPasswordEncoder.matches(user.getPassword(), user1.getPassword());
+        User bd_user = userRepository.findBynameOrEmail(user.getName(), user.getEmail());
+        if (bd_user != null) {
+            boolean valid = userPasswordEncoder.matches(user.getPassword(), bd_user.getPassword());
             if (valid) {
-                return new UserToken(UserTokenUtil.createToken(user1));
+                return new UserToken(UserTokenUtil.createToken(bd_user));
             }
         }
         return null;
@@ -60,9 +60,5 @@ public class UserService {
         return true;
     }
 
-    public boolean validatePassword (User user){
-        String passwordUser = userRepository.getById(user.getId()).getPassword();
-        Boolean validate = userPasswordEncoder.matches(user.getPassword(), passwordUser);
-        return validate;
-    }
+
 }
