@@ -24,6 +24,8 @@ services:
       - MYSQL_DATABASE=dblogin
     networks:
       - app-network
+    volumes:
+      - ./db-init:/docker-entrypoint-initdb.d
 
 networks:
   app-network:

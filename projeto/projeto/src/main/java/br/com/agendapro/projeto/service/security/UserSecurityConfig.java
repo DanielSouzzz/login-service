@@ -16,9 +16,9 @@ public class UserSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSec) throws Exception {
         httpSec
                 .csrf(csrf -> csrf.disable()) // Desativa a proteção CSRF
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .requestMatchers(HttpMethod.POST, "/users/login").permitAll() // permite acesso sem autenticação ao endpoint de login
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                                .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/users").permitAll()
                                 .anyRequest().authenticated() // exige autenticação para qualquer outro endpoint
                 )
                 .addFilterBefore(new UsersecurityFilter(), UsernamePasswordAuthenticationFilter.class);
