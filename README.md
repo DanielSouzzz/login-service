@@ -9,15 +9,23 @@ Atualizar Usuário: Atualiza informações de um usuário existente.
 Login: Autentica o usuário com base nas credenciais fornecidas.
 
 Tecnologias Utilizadas:
+
 Java 17
+
 Spring Boot 3
+
 MySQL 8
+
 Docker e Docker Compose
+
 Maven
 
 Requisitos:
+
 Docker e Docker Compose
+
 JDK 17
+
 Maven
 
 Configuração do Projeto:
