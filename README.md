@@ -30,8 +30,7 @@ Maven
 
 Configuração do Projeto:
 1. Clone o repositório
-2. Compile o projeto
-3. Faça o build do projeto com o docker
+2. Faça o build do projeto com o docker
 
 Após iniciar a aplicação Spring Boot e o banco de dados MySQL. A aplicação estará disponível em http://localhost:8080
 
