@@ -3,30 +3,22 @@ Sistema de Login - Spring Boot com Docker Compose
 Este é um sistema de login desenvolvido em Java com Spring Boot, que permite o cadastro, listagem, atualização e login de usuários. O sistema utiliza Docker Compose para orquestrar a aplicação e o banco de dados MySQL.
 
 Funcionalidades:
-Criar Usuário: Permite o cadastro de novos usuários.
-Listar Usuários: Retorna todos os usuários cadastrados.
-Atualizar Usuário: Atualiza informações de um usuário existente.
-Login: Autentica o usuário com base nas credenciais fornecidas.
+- Criar Usuário
+- Listar Usuários
+- Atualizar Usuário
+- Login
 
 Tecnologias Utilizadas:
-
-Java 17
-
-Spring Boot 3
-
-MySQL 8
-
-Docker e Docker Compose
-
-Maven
+- Java 17
+- Spring Boot 3
+- MySQL 8
+- Docker Compose
+- Maven
 
 Requisitos:
-
-Docker e Docker Compose
-
-JDK 17
-
-Maven
+- Docker e Docker Compose
+- JDK 17
+- Maven
 
 Configuração do Projeto:
 1. Clone o repositório
