@@ -1,4 +1,4 @@
-package br.com.agendapro.projeto.model.dto;
+package br.com.loginService.model.dto;
 
 import lombok.Getter;
 import lombok.Setter;

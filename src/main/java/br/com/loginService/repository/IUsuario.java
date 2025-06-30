@@ -1,6 +1,6 @@
-package br.com.agendapro.projeto.repository;
+package br.com.loginService.repository;
 
-import br.com.agendapro.projeto.model.User;
+import br.com.loginService.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IUsuario extends JpaRepository<User, Integer> {

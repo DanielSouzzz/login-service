@@ -1,10 +1,10 @@
-package br.com.agendapro.projeto.controller;
+package br.com.loginService.controller;
 
-import br.com.agendapro.projeto.model.User;
-import br.com.agendapro.projeto.model.dto.UserDTO;
-import br.com.agendapro.projeto.service.UserService;
+import br.com.loginService.model.User;
+import br.com.loginService.model.dto.UserDTO;
+import br.com.loginService.service.UserService;
 
-import br.com.agendapro.projeto.service.security.UserToken;
+import br.com.loginService.service.security.UserToken;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -1,10 +1,10 @@
-package br.com.agendapro.projeto.service.security;
+package br.com.loginService.service.security;
 
 import java.security.Key;
 import java.util.Collections;
 import java.util.Date;
 
-import br.com.agendapro.projeto.model.User;
+import br.com.loginService.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;

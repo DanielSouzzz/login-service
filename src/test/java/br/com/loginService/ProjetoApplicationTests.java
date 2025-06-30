@@ -1,4 +1,4 @@
-package br.com.agendapro.projeto;
+package br.com.loginService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

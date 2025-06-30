@@ -1,8 +1,7 @@
-package br.com.agendapro.projeto.service.security;
+package br.com.loginService.service.security;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.antlr.v4.runtime.Token;
 
 @Getter
 @Setter

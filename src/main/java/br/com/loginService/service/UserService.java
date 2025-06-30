@@ -1,10 +1,10 @@
-package br.com.agendapro.projeto.service;
+package br.com.loginService.service;
 
-import br.com.agendapro.projeto.model.User;
-import br.com.agendapro.projeto.model.dto.UserDTO;
-import br.com.agendapro.projeto.repository.IUsuario;
-import br.com.agendapro.projeto.service.security.UserToken;
-import br.com.agendapro.projeto.service.security.UserTokenUtil;
+import br.com.loginService.model.User;
+import br.com.loginService.model.dto.UserDTO;
+import br.com.loginService.repository.IUsuario;
+import br.com.loginService.service.security.UserToken;
+import br.com.loginService.service.security.UserTokenUtil;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
