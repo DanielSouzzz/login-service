@@ -51,8 +51,17 @@ curl --location 'http://localhost:8080/users' \
 --header 'Authorization: Bearer {{SEU_TOKEN_AQUI}}'
 
    4. Atualizar Usuário
-curl --location 'http://localhost:8080/users' \
---header 'Authorization: Bearer {{SEU_TOKEN_AQUI}}'
+      curl --location --request PUT 'http://localhost:8080/users' \
+      --header 'Authorization: Bearer {{SEU_TOKEN_AQUI}} \
+      --header 'Content-Type: application/json' \
+      --header 'Cookie: JSESSIONID=6D41D7CD01787833399FA33ECEEFE04D' \
+      --data-raw '{
+      "id": 1,
+      "name": "Bob Esponja calça quadrada",
+      "email": "Bob.esponja@gmail.com",
+      "password": "password125",
+      "phone": "48940028922"
+      }''
 
    5. Deteletar usuário
 curl --location --request DELETE 'http://localhost:8080/users/1' \
