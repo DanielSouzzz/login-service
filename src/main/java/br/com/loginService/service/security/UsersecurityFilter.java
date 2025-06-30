@@ -17,30 +17,6 @@ public class UsersecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        /*if (request.getRequestURI().equals("/users/login")) { // se o endpoint for de login, não exige hearders
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null) {
-            // logs para verificar o valor do cabeçalho Authorization
-            System.out.println("Authorization Header: " + authHeader);
-            UsernamePasswordAuthenticationToken auth = UserTokenUtil.validate(request);
-            // logs para verificar o token de autenticação
-            System.out.println("Authenticated Token: " + auth);
-
-            if (auth != null) {
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            } else {
-                System.out.println("Authentication Token is null");
-            }
-        } else {
-            System.out.println("No Authorization Header");
-        }
-
-        filterChain.doFilter(request, response);
-    }*/
         if (request.getHeader("Authorization") != null) {
         Authentication auth = UserTokenUtil.validate(request);
         SecurityContextHolder.getContext().setAuthentication(auth);
