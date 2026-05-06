@@ -1,31 +1,34 @@
 services:
   app:
-    build:
-      context: .
+    build: .
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/dblogin
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=123abc
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/dblogin?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=app_user
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
     depends_on:
       - db
     networks:
       - app-network
+    restart: always
 
   db:
     image: mysql:8.0
-    ports:
-      - "3307:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=123abc
-      - MYSQL_ALLOW_EMPTY_PASSWORD=no
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=dblogin
+      - MYSQL_USER=app_user
+      - MYSQL_PASSWORD=${DB_PASSWORD}
     networks:
       - app-network
     volumes:
-      - ./db-init:/docker-entrypoint-initdb.d
+      - db_data:/var/lib/mysql
+    restart: always
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  db_data:
