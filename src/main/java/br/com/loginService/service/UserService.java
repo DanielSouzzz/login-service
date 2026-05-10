@@ -28,7 +28,7 @@ public class UserService {
     }
 
     public UserToken tokenGenerate(@Valid UserDTO user) {
-        User bd_user = userRepository.findBynameOrEmail(user.getName(), user.getEmail());
+        User bd_user = userRepository.findByEmail(user.getEmail());
         if (bd_user != null) {
             boolean valid = userPasswordEncoder.matches(user.getPassword(), bd_user.getPassword());
             if (valid) {
@@ -47,8 +47,12 @@ public class UserService {
     public User createUser(User user){
         String encoder = this.userPasswordEncoder.encode(user.getPassword());
         user.setPassword(encoder);
-        User newUser = userRepository.save(user);
-        return newUser;
+
+        if (userRepository.existsUserByEmail(user.getEmail())) {
+            throw new IllegalStateException("Usuário já existe com esse email");
+        }
+
+        return userRepository.save(user);
     }
 
     public User editUser(User user){
