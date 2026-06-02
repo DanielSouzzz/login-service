@@ -10,12 +10,13 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Deploy on server
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
           username: deployer
           key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
           script: |
             set -e
 
@@ -25,4 +26,3 @@ jobs:
             git reset --hard origin/main
 
             docker compose up -d --build
-            docker image prune -f
