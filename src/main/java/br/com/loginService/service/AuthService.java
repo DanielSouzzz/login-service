@@ -36,18 +36,17 @@ public class AuthService {
     }
 
     public User createUser(User user){
-        Strength strength = new Zxcvbn().measure(user.getPassword());
+        if (userRepository.existsUserByEmail(user.getEmail())) {
+            throw new ApplicationException(ErrorEnum.USER_ALREADY_EXISTS);
+        }
 
+        Strength strength = new Zxcvbn().measure(user.getPassword());
         if (strength.getScore() < 3) {
             throw new ApplicationException(ErrorEnum.WEAK_PASSWORD);
         }
 
         String encoder = this.userPasswordEncoder.encode(user.getPassword());
         user.setPassword(encoder);
-
-        if (userRepository.existsUserByEmail(user.getEmail())) {
-            throw new IllegalStateException("Usuário já existe com esse email");
-        }
 
 //        TODO: Adicionar insert na tabela de verificao de email e enviar code pro user confirmar
 
