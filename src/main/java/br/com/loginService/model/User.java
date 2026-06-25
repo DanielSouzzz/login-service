@@ -15,7 +15,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "userId") // Especifica o nome exato da coluna no banco de dados
+    @Column(name = "userId")
     private Integer id;
 
     @NotBlank(message = "name is mandatory")
