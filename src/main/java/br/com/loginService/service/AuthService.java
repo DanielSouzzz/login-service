@@ -37,7 +37,7 @@ public class AuthService {
 
     public User createUser(User user){
         if (userRepository.existsUserByEmail(user.getEmail())) {
-            throw new ApplicationException(ErrorEnum.USER_ALREADY_EXISTS);
+            throw new ApplicationException(ErrorEnum.INVALID_CREDENTIALS);
         }
 
         Strength strength = new Zxcvbn().measure(user.getPassword());
