@@ -92,6 +92,13 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
+        <!-- Source: https://mvnrepository.com/artifact/com.nulab-inc/zxcvbn -->
+        <dependency>
+            <groupId>com.nulab-inc</groupId>
+            <artifactId>zxcvbn</artifactId>
+            <version>1.9.0</version>
+            <scope>compile</scope>
+        </dependency>
 	</dependencies>
 
 	<build>
