@@ -17,7 +17,7 @@ public class UserTokenUtil {
     private static final String HEADER = "Authorization";
     private static final String PREFIX = "Bearer ";
     private static final long EXPIRATION = 12*60*60*1000; // 12 horas para expirar
-    private static final String SECRET_KEY = "toGnORnag@NAL@cIRGI3Daligp5TEMEN";
+    private static final String SECRET_KEY = System.getenv("JWT_SECRET");
     private static final String EMISSOR = "DevNice";
 
     public static String createToken(User user){
@@ -46,7 +46,7 @@ public class UserTokenUtil {
 
     public static UsernamePasswordAuthenticationToken validate(HttpServletRequest request){
         String token = request.getHeader(HEADER);
-        token = token.replace(PREFIX, "");
+        if (token == null || !token.startsWith(PREFIX)) return null;
 
         Jws<Claims> jwsClaims = Jwts.parserBuilder().setSigningKey(SECRET_KEY.getBytes())
                 .build()
