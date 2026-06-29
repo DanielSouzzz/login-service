@@ -3,9 +3,9 @@ package br.com.loginService.service;
 import br.com.loginService.exception.ApplicationException;
 import br.com.loginService.exception.ErrorEnum;
 import br.com.loginService.model.User;
-import br.com.loginService.model.dto.UserDTO;
+import br.com.loginService.model.dto.RegisterUserDTO;
 import br.com.loginService.repository.IUsuario;
-import br.com.loginService.service.security.UserToken;
+import br.com.loginService.model.dto.LoginUserDTO;
 import br.com.loginService.service.security.UserTokenUtil;
 import com.nulabinc.zxcvbn.Strength;
 import com.nulabinc.zxcvbn.Zxcvbn;
@@ -24,12 +24,12 @@ public class AuthService {
         this.userPasswordEncoder = new BCryptPasswordEncoder();
     }
 
-    public UserToken tokenGenerate(@Valid UserDTO user) {
+    public LoginUserDTO tokenGenerate(@Valid RegisterUserDTO user) {
         User bd_user = userRepository.findByEmail(user.getEmail());
         if (bd_user != null) {
             boolean valid = userPasswordEncoder.matches(user.getPassword(), bd_user.getPassword());
             if (valid) {
-               return new UserToken(UserTokenUtil.createToken(bd_user));
+               return new LoginUserDTO(UserTokenUtil.createToken(bd_user));
             }
         }
         return null;
