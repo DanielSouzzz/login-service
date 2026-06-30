@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorEnum {
     WEAK_PASSWORD("The password is weak, please try again!", HttpStatus.BAD_REQUEST),       // 400
     USER_ALREADY_EXISTS("A user with this email already exists.", HttpStatus.CONFLICT),     // 409
-    INVALID_CREDENTIALS("Invalid username or password", HttpStatus.UNAUTHORIZED),           // 401
+    INVALID_CREDENTIALS("Invalid email or password", HttpStatus.UNAUTHORIZED),           // 401
     USER_NOT_FOUND("User not found", HttpStatus.NOT_FOUND),                                 // 404
     USER_DISABLED("User is disabled", HttpStatus.FORBIDDEN),                                // 403
     TOKEN_EXPIRED("Token has expired", HttpStatus.GONE),                                    // 410
