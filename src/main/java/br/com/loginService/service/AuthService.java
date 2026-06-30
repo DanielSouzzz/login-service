@@ -3,9 +3,10 @@ package br.com.loginService.service;
 import br.com.loginService.exception.ApplicationException;
 import br.com.loginService.exception.ErrorEnum;
 import br.com.loginService.model.User;
-import br.com.loginService.model.dto.RegisterUserDTO;
+import br.com.loginService.model.dto.LoginRequestDTO;
+import br.com.loginService.model.dto.RegisterRequestDTO;
 import br.com.loginService.repository.IUsuario;
-import br.com.loginService.model.dto.LoginUserDTO;
+import br.com.loginService.model.dto.LoginResponseDTO;
 import br.com.loginService.service.security.UserTokenUtil;
 import com.nulabinc.zxcvbn.Strength;
 import com.nulabinc.zxcvbn.Zxcvbn;
@@ -24,15 +25,15 @@ public class AuthService {
         this.userPasswordEncoder = new BCryptPasswordEncoder();
     }
 
-    public LoginUserDTO tokenGenerate(@Valid RegisterUserDTO user) {
-        User bd_user = userRepository.findByEmail(user.getEmail());
-        if (bd_user != null) {
-            boolean valid = userPasswordEncoder.matches(user.getPassword(), bd_user.getPassword());
-            if (valid) {
-               return new LoginUserDTO(UserTokenUtil.createToken(bd_user));
-            }
+    public LoginResponseDTO tokenGenerate(@Valid LoginRequestDTO dto) {
+        User user = userRepository.findByEmail(dto.email())
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
+
+        if (!this.userPasswordEncoder.matches(dto.password(), user.getPassword())) {
+            throw new ApplicationException(ErrorEnum.INVALID_CREDENTIALS);
         }
-        return null;
+
+        return new LoginResponseDTO(UserTokenUtil.createToken(user));
     }
 
     public User createUser(User user){

@@ -1,10 +1,11 @@
 package br.com.loginService.controller;
 
 import br.com.loginService.model.User;
-import br.com.loginService.model.dto.RegisterUserDTO;
+import br.com.loginService.model.dto.LoginRequestDTO;
+import br.com.loginService.model.dto.RegisterRequestDTO;
 import br.com.loginService.service.AuthService;
 
-import br.com.loginService.model.dto.LoginUserDTO;
+import br.com.loginService.model.dto.LoginResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,11 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginUserDTO> logar(@Valid @RequestBody RegisterUserDTO user){
-        LoginUserDTO token = userService.tokenGenerate(user);
-        if(token != null) {
-            return ResponseEntity.ok(token);
-        }
-        return ResponseEntity.status(403).build();
+    public ResponseEntity<LoginResponseDTO> logar(@Valid @RequestBody LoginRequestDTO user){
+            return ResponseEntity.ok(userService.tokenGenerate(user));
     }
 }
