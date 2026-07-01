@@ -1,4 +1,4 @@
-package br.com.loginService.service.security;
+package br.com.loginService.security;
 
 import java.security.Key;
 import java.util.Collections;
