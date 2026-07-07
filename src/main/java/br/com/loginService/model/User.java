@@ -1,5 +1,6 @@
 package br.com.loginService.model;
 
+import br.com.loginService.model.enums.StatusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -15,8 +16,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "userId")
-    private Integer id;
+    private Long id;
 
     @NotBlank(message = "name is mandatory")
     @Size(min = 3, message = "the name must have at least 3 characters")
@@ -25,14 +25,18 @@ public class User {
 
     @Email(message = "invalid email")
     @NotBlank(message = "email is mandatory")
-    @Column(name = "email", length = 50, nullable = false)
+    @Column(name = "email", length = 50, nullable = false, unique = true)
     private String email;
 
     @NotBlank(message = "password is mandatory")
-    @Column(name = "password", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @NotBlank(message = "phone is mandatory")
     @Column(name = "phone", length = 15, nullable = false)
     private String phone;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatusUser status = StatusUser.PENDING;
 }
