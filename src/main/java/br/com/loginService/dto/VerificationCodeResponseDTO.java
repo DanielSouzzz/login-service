@@ -1,4 +1,4 @@
-package br.com.loginService.model.dto;
+package br.com.loginService.dto;
 
 public record VerificationCodeResponseDTO(
         String msg
