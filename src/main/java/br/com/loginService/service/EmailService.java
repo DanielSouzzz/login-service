@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class EmailService {
     private final JavaMailSender mailSender;
 
-    @Value("${MAIL_HOST}")
+    @Value("${EMAIL_FROM}")
     private String mailFrom;
 
     public EmailService(JavaMailSender mailSender) {
