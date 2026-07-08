@@ -1,10 +1,11 @@
 package br.com.loginService.service;
 
+import br.com.loginService.dto.*;
 import br.com.loginService.exception.ApplicationException;
 import br.com.loginService.exception.ErrorEnum;
+import br.com.loginService.mapper.UserMapper;
 import br.com.loginService.model.User;
 import br.com.loginService.model.VerificationCode;
-import br.com.loginService.model.dto.*;
 import br.com.loginService.model.enums.StatusUser;
 import br.com.loginService.repository.UserRepository;
 import br.com.loginService.repository.VerificationCodeRepository;
@@ -30,7 +31,8 @@ public class AuthService {
     private final EmailService emailService;
     private final VerificationCodeRepository verificationCodeRepository;
 
-    public AuthService(UserRepository repository, EmailService emailService, VerificationCodeRepository verificationCodeRepository){
+    public AuthService(UserRepository repository, EmailService emailService,
+                       VerificationCodeRepository verificationCodeRepository){
         this.userRepository = repository;
         this.emailService = emailService;
         this.verificationCodeRepository = verificationCodeRepository;
@@ -49,15 +51,17 @@ public class AuthService {
     }
 
     @Transactional
-    public RegisterResponseDTO createUser(User user){
-        if (userRepository.existsUserByEmail(user.getEmail())) {
+    public RegisterResponseDTO createUser(RegisterRequestDTO dto){
+        if (userRepository.existsUserByEmail(dto.email())) {
             throw new ApplicationException(ErrorEnum.INVALID_CREDENTIALS);
         }
 
-        Strength strength = new Zxcvbn().measure(user.getPassword());
+        Strength strength = new Zxcvbn().measure(dto.password());
         if (strength.getScore() < 3) {
             throw new ApplicationException(ErrorEnum.WEAK_PASSWORD);
         }
+
+        User user = UserMapper.toEntity(dto);
 
         user.setPassword(this.userPasswordEncoder.encode(user.getPassword()));
 
@@ -71,7 +75,7 @@ public class AuthService {
         );
 
         try {
-            emailService.sendConfirmationEmail(user.getEmail(), verificationCode.getCode());
+            emailService.sendConfirmationEmail(dto.email(), verificationCode.getCode());
         } catch (MessagingException e) {
             throw new ApplicationException(ErrorEnum.EMAIL_SEND_FAILED, e);
         }

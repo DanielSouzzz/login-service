@@ -1,7 +1,6 @@
 package br.com.loginService.controller;
 
-import br.com.loginService.model.User;
-import br.com.loginService.model.dto.*;
+import br.com.loginService.dto.*;
 import br.com.loginService.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -20,8 +19,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponseDTO> createUser(@Valid @RequestBody User user){
-        return ResponseEntity.status(201).body(userService.createUser(user));
+    public ResponseEntity<RegisterResponseDTO> createUser(@Valid @RequestBody RegisterRequestDTO dto){
+        return ResponseEntity.status(201).body(userService.createUser(dto));
     }
 
     @PostMapping("/verify-code")
