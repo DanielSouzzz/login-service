@@ -4,10 +4,9 @@ import br.com.loginService.exception.ApplicationException;
 import br.com.loginService.exception.ErrorEnum;
 import br.com.loginService.model.User;
 import br.com.loginService.model.VerificationCode;
-import br.com.loginService.model.dto.LoginRequestDTO;
-import br.com.loginService.model.dto.RegisterResponseDTO;
+import br.com.loginService.model.dto.*;
+import br.com.loginService.model.enums.StatusUser;
 import br.com.loginService.repository.UserRepository;
-import br.com.loginService.model.dto.LoginResponseDTO;
 import br.com.loginService.repository.VerificationCodeRepository;
 import br.com.loginService.security.OTPGenerator;
 import br.com.loginService.security.UserTokenUtil;
@@ -20,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -78,6 +79,28 @@ public class AuthService {
         return new RegisterResponseDTO(
                 newUser.getId(),
                 newUser.getEmail(),
-                "User creted. Check your email to confirm your account.");
+                "User created. Check your email to confirm your account.");
+    }
+
+    @Transactional
+    public VerificationCodeResponseDTO verifyCode(VerificationCodeRequestDTO dto) {
+        User user = userRepository.findById(dto.userId())
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
+
+        VerificationCode verificationCode = verificationCodeRepository.findByUserIdAndUsedFalse(dto.userId())
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
+
+        if (!dto.code().equals(verificationCode.getCode())) {
+            throw new ApplicationException(ErrorEnum.INVALID_CODE);
+        }
+
+        if (verificationCode.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new ApplicationException(ErrorEnum.EXPIRED_CODE);
+        }
+
+        verificationCode.setUsed(true);
+        user.setStatus(StatusUser.ACTIVE);
+
+        return new VerificationCodeResponseDTO("User successfully activated.");
     }
 }

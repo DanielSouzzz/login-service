@@ -3,10 +3,12 @@ package br.com.loginService.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @Entity
 @Table(name = "verification_codes")
 @NoArgsConstructor
