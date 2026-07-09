@@ -3,11 +3,13 @@ package br.com.loginService.model;
 import br.com.loginService.model.enums.StatusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -20,27 +22,30 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "name is mandatory")
-    @Size(min = 3, message = "the name must have at least 3 characters")
     @Column(name = "name", length = 200, nullable = false)
     private String name;
 
-    @Email(message = "invalid email")
-    @NotBlank(message = "email is mandatory")
+    @Email
     @Column(name = "email", length = 50, nullable = false, unique = true)
     private String email;
 
-    @NotBlank(message = "password is mandatory")
     @Column(name = "password", nullable = false)
     private String password;
 
-    @NotBlank(message = "phone is mandatory")
-    @Column(name = "phone", length = 15, nullable = false)
+    @Column(name = "phone", length = 20)
     private String phone;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusUser status = StatusUser.PENDING;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
     public User(String name, String email, String password) {
         this.name = name;
