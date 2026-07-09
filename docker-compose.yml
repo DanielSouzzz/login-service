@@ -14,16 +14,8 @@ services:
 
   app:
     build: .
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/dblogin?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=app_user
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - MAIL_HOST=${MAIL_HOST}
-      - MAIL_PORT=${MAIL_PORT}
-      - EMAIL_LOGIN=${EMAIL_LOGIN}
-      - SMTP_KEY=${SMTP_KEY}
-      - EMAIL_FROM=${EMAIL_FROM}
+    env_file:
+      - .env
     depends_on:
       - db
     networks:
@@ -35,12 +27,19 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=dblogin
-      - MYSQL_USER=app_user
-      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_USER=${SPRING_DATASOURCE_USERNAME}
+      - MYSQL_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
     networks:
       - app-network
     volumes:
       - db_data:/var/lib/mysql
+    restart: always
+
+  redis-auth:
+    image: redis:7-alpine
+    container_name: redis-auth
+    networks:
+      - app-network
     restart: always
 
 networks:
