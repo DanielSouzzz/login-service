@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorEnum {
-    WEAK_PASSWORD("The password is weak, please try again!", HttpStatus.BAD_REQUEST),       // 400
-    USER_ALREADY_EXISTS("A user with this email already exists.", HttpStatus.CONFLICT),     // 409
+    WEAK_PASSWORD("The password is weak, please try again", HttpStatus.BAD_REQUEST),       // 400
+    USER_ALREADY_EXISTS("A user with this email already exists", HttpStatus.CONFLICT),     // 409
     INVALID_CREDENTIALS("Invalid email or password", HttpStatus.UNAUTHORIZED),              // 401
     RESOURCE_NOT_FOUND("Resource not found", HttpStatus.NOT_FOUND),                         // 404
     USER_DISABLED("User is disabled", HttpStatus.FORBIDDEN),                                // 403
@@ -16,6 +16,7 @@ public enum ErrorEnum {
     EMAIL_SEND_FAILED("Error sending confirmation email", HttpStatus.BAD_GATEWAY),
     INVALID_CODE("Invalid verification code", HttpStatus.BAD_REQUEST),
     EXPIRED_CODE("Verification code has expired", HttpStatus.BAD_REQUEST),
+    RATE_LIMIT_EXCEEDED("Rate limit exceeded", HttpStatus.TOO_MANY_REQUESTS)                // 419
     ;
 
     private final String msg;

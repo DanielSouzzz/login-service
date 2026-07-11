@@ -13,14 +13,20 @@ import br.com.loginService.security.OTPGenerator;
 import br.com.loginService.security.UserTokenUtil;
 import com.nulabinc.zxcvbn.Strength;
 import com.nulabinc.zxcvbn.Zxcvbn;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.BucketConfiguration;
+import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -30,16 +36,23 @@ public class AuthService {
     private final PasswordEncoder userPasswordEncoder;
     private final EmailService emailService;
     private final VerificationCodeRepository verificationCodeRepository;
+    private final LettuceBasedProxyManager<String> proxyManager;
 
-    public AuthService(UserRepository repository, EmailService emailService,
-                       VerificationCodeRepository verificationCodeRepository){
+
+    public AuthService(UserRepository repository,
+                       EmailService emailService,
+                       VerificationCodeRepository verificationCodeRepository,
+                       LettuceBasedProxyManager<String> proxyManager){
         this.userRepository = repository;
         this.emailService = emailService;
         this.verificationCodeRepository = verificationCodeRepository;
+        this.proxyManager = proxyManager;
         this.userPasswordEncoder = new BCryptPasswordEncoder();
     }
 
     public LoginResponseDTO tokenGenerate(@Valid LoginRequestDTO dto) {
+        checkEmailRateLimit(dto.email());
+
         User user = userRepository.findByEmail(dto.email())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
@@ -106,5 +119,24 @@ public class AuthService {
         user.setStatus(StatusUser.ACTIVE);
 
         return new VerificationCodeResponseDTO("User successfully activated.");
+    }
+
+    private void checkEmailRateLimit(String email) {
+        try {
+            Bucket bucket = proxyManager.getProxy("rate:login:email:" + email, this::emailLimitConfig);
+
+            if (!bucket.tryConsume(1)) {
+                throw new ApplicationException(ErrorEnum.RATE_LIMIT_EXCEEDED);
+            }
+        } catch (RedisConnectionFailureException | RedisSystemException e) {
+            log.warn("Redis unavailable, skipping rate limit. email={}", email, e);
+        }
+    }
+
+    private BucketConfiguration emailLimitConfig() {
+        return BucketConfiguration.builder()
+                .addLimit(limit -> limit.capacity(5)
+                        .refillGreedy(5,Duration.ofMinutes(15)))
+                .build();
     }
 }
