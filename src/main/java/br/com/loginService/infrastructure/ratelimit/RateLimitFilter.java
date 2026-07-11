@@ -37,9 +37,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String ip = extractClientIp(request);
-        Bucket bucket = proxyManager.getProxy("rate:login:ip:" + ip, this::ipLimitConfig);
 
         try {
+            Bucket bucket = proxyManager.getProxy("rate:login:ip:" + ip, this::ipLimitConfig);
+
             if (bucket.tryConsume(1)) {
                 filterChain.doFilter(request, response);
             } else {
@@ -48,15 +49,17 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 response.getWriter().write("{\"error\":\"RATE_LIMIT_EXCEEDED\"}");
             }
         } catch (Exception e) {
-            log.warn("Rate limit indisponível, seguindo sem throttle: {}", e.getMessage());
+            log.warn("Rate limit unavailable, continuing without throttling: {}", e.getMessage());
             filterChain.doFilter(request, response);
         }
     }
 
     private BucketConfiguration ipLimitConfig() {
         return BucketConfiguration.builder()
-                .addLimit(limit -> limit.capacity(20).refillGreedy(20, Duration.ofMinutes(15)))
-                .addLimit(limit -> limit.capacity(5).refillGreedy(5, Duration.ofSeconds(10)))
+                .addLimit(limit -> limit.capacity(20)
+                        .refillGreedy(20, Duration.ofMinutes(15)))
+                .addLimit(limit -> limit.capacity(5)
+                        .refillGreedy(5, Duration.ofSeconds(10)))
                 .build();
     }
 
