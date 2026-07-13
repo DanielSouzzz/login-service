@@ -7,7 +7,5 @@ import java.util.Optional;
 
 public interface VerificationCodeRepository extends JpaRepository<VerificationCode, Long> {
 
-    Optional<VerificationCode> findByUserIdAndUsedFalse(Long id);
-
-
+    Optional<VerificationCode> findFirstByUserIdAndUsedFalseOrderByCreatedAtDesc(Long id);
 }

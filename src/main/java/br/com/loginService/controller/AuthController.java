@@ -12,24 +12,29 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final AuthService userService;
+    private final AuthService authService;
 
     public AuthController(AuthService userService) {
-        this.userService = userService;
+        this.authService = userService;
     }
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDTO> createUser(@Valid @RequestBody RegisterRequestDTO dto){
-        return ResponseEntity.status(201).body(userService.createUser(dto));
+        return ResponseEntity.status(201).body(authService.createUser(dto));
     }
 
     @PostMapping("/verify-code")
     public ResponseEntity<VerificationCodeResponseDTO> verifyCode(@Valid @RequestBody VerificationCodeRequestDTO dto) {
-        return ResponseEntity.status(201).body(userService.verifyCode(dto));
+        return ResponseEntity.status(201).body(authService.verifyCode(dto));
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> logar(@Valid @RequestBody LoginRequestDTO user){
-            return ResponseEntity.ok(userService.tokenGenerate(user));
+            return ResponseEntity.ok(authService.tokenGenerate(user));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ForgotPasswordResponseDTO> forgotPassword(@RequestBody ForgotPasswordRequestDTO dto) {
+        return ResponseEntity.ok(authService.forgotPassword(dto));
     }
 }

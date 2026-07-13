@@ -16,7 +16,6 @@ import com.nulabinc.zxcvbn.Zxcvbn;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
-import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -87,11 +87,7 @@ public class AuthService {
                 )
         );
 
-        try {
-            emailService.sendConfirmationEmail(dto.email(), verificationCode.getCode());
-        } catch (MessagingException e) {
-            throw new ApplicationException(ErrorEnum.EMAIL_SEND_FAILED, e);
-        }
+        emailService.sendConfirmationEmail(dto.email(), verificationCode.getCode());
 
         return new RegisterResponseDTO(
                 newUser.getId(),
@@ -104,7 +100,7 @@ public class AuthService {
         User user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
 
-        VerificationCode verificationCode = verificationCodeRepository.findByUserIdAndUsedFalse(dto.userId())
+        VerificationCode verificationCode = verificationCodeRepository.findFirstByUserIdAndUsedFalseOrderByCreatedAtDesc(dto.userId())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
 
         if (!dto.code().equals(verificationCode.getCode())) {
@@ -119,6 +115,22 @@ public class AuthService {
         user.setStatus(StatusUser.ACTIVE);
 
         return new VerificationCodeResponseDTO("User successfully activated.");
+    }
+
+    public ForgotPasswordResponseDTO forgotPassword(ForgotPasswordRequestDTO dto) {
+        Optional<User> user = userRepository.findByEmail(dto.email());
+
+        if (user.isPresent()) {
+            VerificationCode verificationCode = this.verificationCodeRepository.save(
+                    new VerificationCode(user.get(),
+                            OTPGenerator.generate()
+                    )
+            );
+
+            emailService.sendConfirmationEmail(user.get().getEmail(), verificationCode.getCode());
+        }
+
+        return new ForgotPasswordResponseDTO("If an account with this email exists, password reset instructions have been sent.");
     }
 
     private void checkEmailRateLimit(String email) {
