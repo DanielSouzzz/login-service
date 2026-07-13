@@ -2,11 +2,14 @@ package br.com.loginService.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class EmailService {
     private final JavaMailSender mailSender;
@@ -18,26 +21,32 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    public void sendConfirmationEmail(String to, String code) throws MessagingException {
-        MimeMessage msg = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
+    @Async
+    public void sendConfirmationEmail(String to, String code) {
 
-        helper.setFrom(mailFrom);
-        helper.setTo(to);
-        helper.setSubject("Confirme seu email");
+        try {
+            MimeMessage msg = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
 
-        String html = """
-            <html>
-               <body>
-                   <h2>Bem-vindo!</h2>
-                   <p>Segue abaixo seu código de confirmação:</p>
-                   <p><strong>%s</strong></p>
-                </body>
-           </html>
-        """.formatted(code);
+            helper.setFrom(mailFrom);
+            helper.setTo(to);
+            helper.setSubject("Confirme seu email");
 
-        helper.setText(html, true);
+            String html = """
+                        <html>
+                           <body>
+                               <h2>Bem-vindo!</h2>
+                               <p>Segue abaixo seu código de confirmação:</p>
+                               <p><strong>%s</strong></p>
+                            </body>
+                       </html>
+                    """.formatted(code);
 
-        mailSender.send(msg);
+            helper.setText(html, true);
+
+            mailSender.send(msg);
+        } catch (MessagingException e) {
+            log.error("Error sending confirmation email.", e);
+        }
     }
 }
