@@ -65,6 +65,8 @@ public class AuthService {
 
     @Transactional
     public RegisterResponseDTO createUser(RegisterRequestDTO dto){
+        checkEmailRateLimit(dto.email());
+
         if (userRepository.existsUserByEmail(dto.email())) {
             throw new ApplicationException(ErrorEnum.INVALID_CREDENTIALS);
         }
@@ -96,6 +98,8 @@ public class AuthService {
 
     @Transactional
     public VerificationCodeResponseDTO verifyCode(VerificationCodeRequestDTO dto) {
+        checkEmailRateLimit(dto.email());
+
         User user = userRepository.findUserByEmail(dto.email())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
 
@@ -113,6 +117,8 @@ public class AuthService {
     }
 
     public ForgotPasswordResponseDTO forgotPassword(ForgotPasswordRequestDTO dto) {
+        checkEmailRateLimit(dto.email());
+
         Optional<User> user = userRepository.findUserByEmail(dto.email());
 
         if (user.isPresent()) {
@@ -130,6 +136,8 @@ public class AuthService {
 
     @Transactional
     public ResetPasswordResponseDTO resetPassword(ResetPasswordRequestDTO dto) {
+        checkEmailRateLimit(dto.email());
+
         User user = userRepository.findUserByEmail(dto.email())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
