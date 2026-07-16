@@ -69,7 +69,7 @@ public class AuthService {
             throw new ApplicationException(ErrorEnum.INVALID_CREDENTIALS);
         }
 
-        if (isValidPassword(dto.password())) {
+        if (!isValidPassword(dto.password())) {
             throw new ApplicationException(ErrorEnum.WEAK_PASSWORD);
         }
 
@@ -140,7 +140,7 @@ public class AuthService {
             throw new ApplicationException(ErrorEnum.INVALID_CODE);
         }
 
-        if (isValidPassword(dto.newPassword())) {
+        if (!isValidPassword(dto.newPassword())) {
             throw new ApplicationException(ErrorEnum.WEAK_PASSWORD);
         }
 
