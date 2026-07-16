@@ -69,8 +69,7 @@ public class AuthService {
             throw new ApplicationException(ErrorEnum.INVALID_CREDENTIALS);
         }
 
-        Strength strength = new Zxcvbn().measure(dto.password());
-        if (strength.getScore() < 3) {
+        if (isValidPassword(dto.password())) {
             throw new ApplicationException(ErrorEnum.WEAK_PASSWORD);
         }
 
@@ -97,18 +96,14 @@ public class AuthService {
 
     @Transactional
     public VerificationCodeResponseDTO verifyCode(VerificationCodeRequestDTO dto) {
-        User user = userRepository.findById(dto.userId())
+        User user = userRepository.findByEmail(dto.email())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
 
-        VerificationCode verificationCode = verificationCodeRepository.findFirstByUserIdAndUsedFalseOrderByCreatedAtDesc(dto.userId())
+        VerificationCode verificationCode = verificationCodeRepository.findFirstByUserEmailAndUsedFalseOrderByCreatedAtDesc(dto.email())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
 
-        if (!dto.code().equals(verificationCode.getCode())) {
+        if (!isValidCode(dto.code(), verificationCode)) {
             throw new ApplicationException(ErrorEnum.INVALID_CODE);
-        }
-
-        if (verificationCode.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new ApplicationException(ErrorEnum.EXPIRED_CODE);
         }
 
         verificationCode.setUsed(true);
@@ -131,6 +126,39 @@ public class AuthService {
         }
 
         return new ForgotPasswordResponseDTO("If an account with this email exists, password reset instructions have been sent.");
+    }
+
+    @Transactional
+    public ResetPasswordResponseDTO resetPassword(ResetPasswordRequestDTO dto) {
+        User user = userRepository.findByEmail(dto.email())
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
+
+        VerificationCode verificationCode = verificationCodeRepository.findFirstByUserEmailAndUsedFalseOrderByCreatedAtDesc(dto.email())
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
+
+        if (!isValidCode(dto.code(), verificationCode)) {
+            throw new ApplicationException(ErrorEnum.INVALID_CODE);
+        }
+
+        if (isValidPassword(dto.newPassword())) {
+            throw new ApplicationException(ErrorEnum.WEAK_PASSWORD);
+        }
+
+        user.setPassword(this.userPasswordEncoder.encode(dto.newPassword()));
+        verificationCode.setUsed(true);
+
+        return new ResetPasswordResponseDTO("Password reset completed with successfully");
+    }
+
+    private boolean isValidCode(String code, VerificationCode verificationCode) {
+        return code.equals(verificationCode.getCode())
+                && !verificationCode.getExpiresAt().isBefore(LocalDateTime.now());
+    }
+
+    private boolean isValidPassword(String password) {
+        Strength strength = new Zxcvbn().measure(password);
+
+        return strength.getScore() >= 3;
     }
 
     private void checkEmailRateLimit(String email) {
