@@ -53,7 +53,7 @@ public class AuthService {
     public LoginResponseDTO tokenGenerate(@Valid LoginRequestDTO dto) {
         checkEmailRateLimit(dto.email());
 
-        User user = userRepository.findByEmail(dto.email())
+        User user = userRepository.findUserByEmailAndActiveStatus(dto.email())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
         if (!this.userPasswordEncoder.matches(dto.password(), user.getPassword())) {
@@ -96,7 +96,7 @@ public class AuthService {
 
     @Transactional
     public VerificationCodeResponseDTO verifyCode(VerificationCodeRequestDTO dto) {
-        User user = userRepository.findByEmail(dto.email())
+        User user = userRepository.findUserByEmail(dto.email())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
 
         VerificationCode verificationCode = verificationCodeRepository.findFirstByUserEmailAndUsedFalseOrderByCreatedAtDesc(dto.email())
@@ -113,7 +113,7 @@ public class AuthService {
     }
 
     public ForgotPasswordResponseDTO forgotPassword(ForgotPasswordRequestDTO dto) {
-        Optional<User> user = userRepository.findByEmail(dto.email());
+        Optional<User> user = userRepository.findUserByEmail(dto.email());
 
         if (user.isPresent()) {
             VerificationCode verificationCode = this.verificationCodeRepository.save(
@@ -130,7 +130,7 @@ public class AuthService {
 
     @Transactional
     public ResetPasswordResponseDTO resetPassword(ResetPasswordRequestDTO dto) {
-        User user = userRepository.findByEmail(dto.email())
+        User user = userRepository.findUserByEmail(dto.email())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
         VerificationCode verificationCode = verificationCodeRepository.findFirstByUserEmailAndUsedFalseOrderByCreatedAtDesc(dto.email())
