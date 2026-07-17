@@ -1,6 +1,6 @@
 package br.com.loginService.controller;
 
-import br.com.loginService.dto.*;
+import br.com.loginService.dto.external.*;
 import br.com.loginService.service.AuthService;
 
 import jakarta.validation.Valid;

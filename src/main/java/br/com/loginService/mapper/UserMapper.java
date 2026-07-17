@@ -1,7 +1,7 @@
 package br.com.loginService.mapper;
 
-import br.com.loginService.dto.RegisterRequestDTO;
-import br.com.loginService.dto.RegisterResponseDTO;
+import br.com.loginService.dto.external.RegisterRequestDTO;
+import br.com.loginService.dto.external.RegisterResponseDTO;
 import br.com.loginService.model.User;
 
 public class UserMapper {

@@ -1,4 +1,4 @@
-package br.com.loginService.dto;
+package br.com.loginService.dto.external;
 
 public record RegisterResponseDTO(
         Long userId,
