@@ -24,7 +24,7 @@ public class UserTokenUtil {
         Key secretKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
         String token = Jwts.builder()
-                .setSubject(user.getName())
+                .setSubject(user.getEmail())
                 .setIssuer(EMISSOR)
                 .setExpiration(new Date((System.currentTimeMillis() + EXPIRATION)))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -52,12 +52,12 @@ public class UserTokenUtil {
                 .build()
                 .parseClaimsJws(token);
 
-        String username = jwsClaims.getBody().getSubject();
+        String email = jwsClaims.getBody().getSubject();
         String issuer = jwsClaims.getBody().getIssuer();
         Date expira = jwsClaims.getBody().getExpiration();
 
-        if (isSubjectValid(username) && isEmissorValid(issuer) && isExpirationValid(expira)) {
-            return new UsernamePasswordAuthenticationToken(username,null, Collections.emptyList());
+        if (isSubjectValid(email) && isEmissorValid(issuer) && isExpirationValid(expira)) {
+            return new UsernamePasswordAuthenticationToken(email,null, Collections.emptyList());
         }
 
         return null;
