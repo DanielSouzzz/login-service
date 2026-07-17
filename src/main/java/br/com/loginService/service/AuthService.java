@@ -1,6 +1,7 @@
 package br.com.loginService.service;
 
-import br.com.loginService.dto.*;
+import br.com.loginService.dto.external.*;
+import br.com.loginService.dto.internal.VerificationContextDTO;
 import br.com.loginService.exception.ApplicationException;
 import br.com.loginService.exception.ErrorEnum;
 import br.com.loginService.mapper.UserMapper;
@@ -71,7 +72,7 @@ public class AuthService {
             throw new ApplicationException(ErrorEnum.INVALID_CREDENTIALS);
         }
 
-        if (!isValidPassword(dto.password())) {
+        if (isInvalidPassword(dto.password())) {
             throw new ApplicationException(ErrorEnum.WEAK_PASSWORD);
         }
 
@@ -98,20 +99,11 @@ public class AuthService {
 
     @Transactional
     public VerificationCodeResponseDTO verifyCode(VerificationCodeRequestDTO dto) {
-        checkEmailRateLimit(dto.email());
 
-        User user = userRepository.findUserByEmail(dto.email())
-                .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
+        var verificationContextDTO = validateVerificationCode(dto.email(), dto.code());
 
-        VerificationCode verificationCode = verificationCodeRepository.findFirstByUserEmailAndUsedFalseOrderByCreatedAtDesc(dto.email())
-                .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
-
-        if (!isValidCode(dto.code(), verificationCode)) {
-            throw new ApplicationException(ErrorEnum.INVALID_CODE);
-        }
-
-        verificationCode.setUsed(true);
-        user.setStatus(StatusUser.ACTIVE);
+        verificationContextDTO.verificationCode().setUsed(true);
+        verificationContextDTO.user().setStatus(StatusUser.ACTIVE);
 
         return new VerificationCodeResponseDTO("User successfully activated.");
     }
@@ -136,26 +128,34 @@ public class AuthService {
 
     @Transactional
     public ResetPasswordResponseDTO resetPassword(ResetPasswordRequestDTO dto) {
-        checkEmailRateLimit(dto.email());
 
-        User user = userRepository.findUserByEmail(dto.email())
-                .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
+        var verificationContextDTO = validateVerificationCode(dto.email(), dto.code());
 
-        VerificationCode verificationCode = verificationCodeRepository.findFirstByUserEmailAndUsedFalseOrderByCreatedAtDesc(dto.email())
-                .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
-
-        if (!isValidCode(dto.code(), verificationCode)) {
-            throw new ApplicationException(ErrorEnum.INVALID_CODE);
-        }
-
-        if (!isValidPassword(dto.newPassword())) {
+        if (isInvalidPassword(dto.newPassword())) {
             throw new ApplicationException(ErrorEnum.WEAK_PASSWORD);
         }
 
-        user.setPassword(this.userPasswordEncoder.encode(dto.newPassword()));
-        verificationCode.setUsed(true);
+        verificationContextDTO.user().setPassword(this.userPasswordEncoder.encode(dto.newPassword()));
+        verificationContextDTO.verificationCode().setUsed(true);
 
         return new ResetPasswordResponseDTO("Password reset completed with successfully");
+    }
+
+    private VerificationContextDTO validateVerificationCode(String email, String code) {
+        checkEmailRateLimit(email);
+
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
+
+        VerificationCode verificationCode = verificationCodeRepository
+                .findFirstByUserEmailAndUsedFalseOrderByCreatedAtDesc(email)
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
+
+        if (!isValidCode(code, verificationCode)) {
+            throw new ApplicationException(ErrorEnum.INVALID_CODE);
+        }
+
+        return new VerificationContextDTO(user, verificationCode);
     }
 
     private boolean isValidCode(String code, VerificationCode verificationCode) {
@@ -163,10 +163,10 @@ public class AuthService {
                 && !verificationCode.getExpiresAt().isBefore(LocalDateTime.now());
     }
 
-    private boolean isValidPassword(String password) {
+    private boolean isInvalidPassword(String password) {
         Strength strength = new Zxcvbn().measure(password);
 
-        return strength.getScore() >= 3;
+        return strength.getScore() < 3;
     }
 
     private void checkEmailRateLimit(String email) {
