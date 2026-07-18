@@ -7,6 +7,7 @@ import java.util.Date;
 import br.com.loginService.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -32,10 +33,6 @@ public class UserTokenUtil {
         return PREFIX + token;
     }
 
-    private static boolean isExpirationValid(Date expiration) {
-        return expiration.after(new Date(System.currentTimeMillis()));
-    }
-
     private static boolean isEmissorValid(String emissor){
         return emissor.equals(EMISSOR);
     }
@@ -45,19 +42,25 @@ public class UserTokenUtil {
     }
 
     public static UsernamePasswordAuthenticationToken validate(HttpServletRequest request){
-        String token = request.getHeader(HEADER);
-        if (token == null || !token.startsWith(PREFIX)) return null;
 
-        Jws<Claims> jwsClaims = Jwts.parserBuilder().setSigningKey(SECRET_KEY.getBytes())
-                .build()
-                .parseClaimsJws(token);
+        String header = request.getHeader(HEADER);
+        if (header == null || !header.startsWith(PREFIX)) return null;
 
-        String email = jwsClaims.getBody().getSubject();
-        String issuer = jwsClaims.getBody().getIssuer();
-        Date expira = jwsClaims.getBody().getExpiration();
+        String token = header.substring(PREFIX.length());
 
-        if (isSubjectValid(email) && isEmissorValid(issuer) && isExpirationValid(expira)) {
-            return new UsernamePasswordAuthenticationToken(email,null, Collections.emptyList());
+        try {
+            Jws<Claims> jwsClaims = Jwts.parserBuilder().setSigningKey(SECRET_KEY.getBytes())
+                    .build()
+                    .parseClaimsJws(token);
+
+            String email = jwsClaims.getBody().getSubject();
+            String issuer = jwsClaims.getBody().getIssuer();
+
+            if (isSubjectValid(email) && isEmissorValid(issuer)) {
+                return new UsernamePasswordAuthenticationToken(email, null, Collections.emptyList());
+            }
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
         }
 
         return null;
