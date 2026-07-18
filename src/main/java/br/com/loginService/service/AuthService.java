@@ -152,7 +152,7 @@ public class AuthService {
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
 
         if (!isValidCode(code, verificationCode)) {
-            throw new ApplicationException(ErrorEnum.INVALID_CODE);
+            throw new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND);
         }
 
         return new VerificationContextDTO(user, verificationCode);
