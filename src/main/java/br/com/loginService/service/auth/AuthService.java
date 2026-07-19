@@ -1,4 +1,4 @@
-package br.com.loginService.service;
+package br.com.loginService.service.auth;
 
 import br.com.loginService.dto.external.*;
 import br.com.loginService.dto.internal.VerificationContextDTO;
@@ -10,8 +10,9 @@ import br.com.loginService.model.VerificationCode;
 import br.com.loginService.model.enums.StatusUser;
 import br.com.loginService.repository.UserRepository;
 import br.com.loginService.repository.VerificationCodeRepository;
-import br.com.loginService.security.OTPGenerator;
-import br.com.loginService.security.AccessTokenService;
+import br.com.loginService.infrastructure.security.OTPGenerator;
+import br.com.loginService.service.security.AccessTokenService;
+import br.com.loginService.service.email.EmailService;
 import com.nulabinc.zxcvbn.Strength;
 import com.nulabinc.zxcvbn.Zxcvbn;
 import io.github.bucket4j.Bucket;

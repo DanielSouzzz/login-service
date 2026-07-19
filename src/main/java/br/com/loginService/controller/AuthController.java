@@ -1,7 +1,7 @@
 package br.com.loginService.controller;
 
 import br.com.loginService.dto.external.*;
-import br.com.loginService.service.AuthService;
+import br.com.loginService.service.auth.AuthService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

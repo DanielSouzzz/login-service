@@ -1,4 +1,4 @@
-package br.com.loginService.security;
+package br.com.loginService.infrastructure.security;
 
 import java.security.SecureRandom;
 

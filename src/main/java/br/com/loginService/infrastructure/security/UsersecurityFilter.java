@@ -1,5 +1,6 @@
-package br.com.loginService.security;
+package br.com.loginService.infrastructure.security;
 
+import br.com.loginService.service.security.AccessTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package br.com.loginService.security;
+package br.com.loginService.service.security;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;

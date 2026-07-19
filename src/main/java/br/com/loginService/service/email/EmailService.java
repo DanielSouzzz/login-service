@@ -1,4 +1,4 @@
-package br.com.loginService.service;
+package br.com.loginService.service.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
