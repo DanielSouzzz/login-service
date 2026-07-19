@@ -10,6 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,17 +24,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", length = 200, nullable = false)
+    @Column(length = 200, nullable = false)
     private String name;
 
     @Email
-    @Column(name = "email", length = 50, nullable = false, unique = true)
+    @Column(length = 50, nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false)
+    @Column(nullable = false)
     private String password;
 
-    @Column(name = "phone", length = 20)
+    @Column(length = 20)
     private String phone;
 
     @Enumerated(EnumType.STRING)
@@ -40,11 +42,11 @@ public class User {
     private StatusUser status = StatusUser.PENDING;
 
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
+    @Column(name = "update_at", nullable = false)
     private LocalDateTime updatedAt;
 
     public User(String name, String email, String password) {

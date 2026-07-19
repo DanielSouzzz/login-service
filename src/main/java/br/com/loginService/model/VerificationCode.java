@@ -28,10 +28,10 @@ public class VerificationCode {
     @Column(nullable = false)
     private boolean used;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
     public VerificationCode(User user, String code) {
