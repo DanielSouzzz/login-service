@@ -11,7 +11,7 @@ import br.com.loginService.model.enums.StatusUser;
 import br.com.loginService.repository.UserRepository;
 import br.com.loginService.repository.VerificationCodeRepository;
 import br.com.loginService.security.OTPGenerator;
-import br.com.loginService.security.UserTokenUtil;
+import br.com.loginService.security.AccessTokenService;
 import com.nulabinc.zxcvbn.Strength;
 import com.nulabinc.zxcvbn.Zxcvbn;
 import io.github.bucket4j.Bucket;
@@ -61,7 +61,7 @@ public class AuthService {
             throw new ApplicationException(ErrorEnum.INVALID_CREDENTIALS);
         }
 
-        return new LoginResponseDTO(UserTokenUtil.createToken(user));
+        return new LoginResponseDTO(AccessTokenService.createAcessToken(user));
     }
 
     @Transactional

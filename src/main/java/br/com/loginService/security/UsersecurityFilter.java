@@ -16,7 +16,7 @@ public class UsersecurityFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         if (request.getHeader("Authorization") != null) {
-        Authentication auth = UserTokenUtil.validate(request);
+        Authentication auth = AccessTokenService.validate(request);
             if (auth != null) {
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }

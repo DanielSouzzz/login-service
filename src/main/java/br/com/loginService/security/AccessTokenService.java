@@ -1,5 +1,6 @@
 package br.com.loginService.security;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Collections;
 import java.util.Date;
@@ -14,23 +15,16 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-public class UserTokenUtil {
+public class AccessTokenService {
     private static final String HEADER = "Authorization";
     private static final String PREFIX = "Bearer ";
-    private static final long EXPIRATION = 12*60*60*1000; // 12 horas para expirar
+    private static final long EXPIRATION = 15 * 60 * 1000;
     private static final String SECRET_KEY = System.getenv("JWT_SECRET");
-    private static final String EMISSOR = "DevNice";
+    private static final String EMISSOR = "https://danielsouzz.com.br";
+    private static final Key KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
-    public static String createToken(User user){
-        Key secretKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
-
-        String token = Jwts.builder()
-                .setSubject(user.getEmail())
-                .setIssuer(EMISSOR)
-                .setExpiration(new Date((System.currentTimeMillis() + EXPIRATION)))
-                .signWith(secretKey, SignatureAlgorithm.HS256)
-                .compact();
-        return PREFIX + token;
+    public static String createAcessToken(User user){
+        return generateToken(user.getEmail());
     }
 
     private static boolean isEmissorValid(String emissor){
@@ -49,7 +43,7 @@ public class UserTokenUtil {
         String token = header.substring(PREFIX.length());
 
         try {
-            Jws<Claims> jwsClaims = Jwts.parserBuilder().setSigningKey(SECRET_KEY.getBytes())
+            Jws<Claims> jwsClaims = Jwts.parserBuilder().setSigningKey(KEY)
                     .build()
                     .parseClaimsJws(token);
 
@@ -64,5 +58,15 @@ public class UserTokenUtil {
         }
 
         return null;
+    }
+
+    private static String generateToken(String subject) {
+        return Jwts.builder()
+                .setSubject(subject)
+                .setIssuer(EMISSOR)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + AccessTokenService.EXPIRATION))
+                .signWith(KEY, SignatureAlgorithm.HS256)
+                .compact();
     }
 }
