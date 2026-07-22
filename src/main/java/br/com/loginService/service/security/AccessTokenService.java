@@ -18,7 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 public class AccessTokenService {
     private static final String HEADER = "Authorization";
     private static final String PREFIX = "Bearer ";
-    private static final long EXPIRATION = 15 * 60 * 1000;
+    private static final long EXPIRATION = 15 * 60 * 1000; // 15 min
     private static final String SECRET_KEY = System.getenv("JWT_SECRET");
     private static final String EMISSOR = "https://danielsouzz.com.br";
     private static final Key KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
