@@ -3,6 +3,7 @@ package br.com.loginService.controller;
 import br.com.loginService.dto.external.*;
 import br.com.loginService.service.auth.AuthService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final HttpServletRequest request;
 
-    public AuthController(AuthService userService) {
+
+    public AuthController(AuthService userService, HttpServletRequest request) {
         this.authService = userService;
+        this.request = request;
     }
 
     @PostMapping("/register")
@@ -29,8 +33,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> logar(@Valid @RequestBody LoginRequestDTO user){
-            return ResponseEntity.ok(authService.tokenGenerate(user));
+    public ResponseEntity<LoginResponseDTO> logar(@Valid @RequestBody LoginRequestDTO dto) {
+            return ResponseEntity.ok(authService.tokenGenerate(dto, request.getRemoteAddr()));
     }
 
     @PostMapping("/forgot-password")
