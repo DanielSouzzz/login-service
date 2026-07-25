@@ -5,6 +5,7 @@ import br.com.loginService.dto.internal.VerificationContextDTO;
 import br.com.loginService.exception.ApplicationException;
 import br.com.loginService.exception.ErrorEnum;
 import br.com.loginService.mapper.UserMapper;
+import br.com.loginService.model.Session;
 import br.com.loginService.model.User;
 import br.com.loginService.model.VerificationCode;
 import br.com.loginService.model.enums.StatusUser;
@@ -39,20 +40,22 @@ public class AuthService {
     private final EmailService emailService;
     private final VerificationCodeRepository verificationCodeRepository;
     private final LettuceBasedProxyManager<String> proxyManager;
+    private final SessionService sessionService;
 
 
     public AuthService(UserRepository repository,
                        EmailService emailService,
                        VerificationCodeRepository verificationCodeRepository,
-                       LettuceBasedProxyManager<String> proxyManager){
+                       LettuceBasedProxyManager<String> proxyManager, SessionService sessionService){
         this.userRepository = repository;
         this.emailService = emailService;
         this.verificationCodeRepository = verificationCodeRepository;
         this.proxyManager = proxyManager;
+        this.sessionService = sessionService;
         this.userPasswordEncoder = new BCryptPasswordEncoder();
     }
 
-    public LoginResponseDTO tokenGenerate(@Valid LoginRequestDTO dto) {
+    public LoginResponseDTO tokenGenerate(@Valid LoginRequestDTO dto, String ip) {
         checkEmailRateLimit(dto.email());
 
         User user = userRepository.findUserByEmailAndActiveStatus(dto.email())
@@ -62,7 +65,8 @@ public class AuthService {
             throw new ApplicationException(ErrorEnum.INVALID_CREDENTIALS);
         }
 
-        return new LoginResponseDTO(AccessTokenService.createAcessToken(user));
+        return new LoginResponseDTO(AccessTokenService.createAcessToken(user),
+                sessionService.create(user, ip));
     }
 
     @Transactional
@@ -140,6 +144,16 @@ public class AuthService {
         verificationContextDTO.verificationCode().setUsed(true);
 
         return new ResetPasswordResponseDTO("Password reset completed with successfully");
+    }
+
+    public RefreshTokenResponseDTO refreshToken(@Valid RefreshTokenRequestDTO dto) {
+        Session session = sessionService.validate(dto.refresh_token());
+
+        User user = userRepository.findUserByIdAndActiveStatus(session.getUser().getId())
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
+
+        return new RefreshTokenResponseDTO(AccessTokenService.createAcessToken(user),
+                sessionService.refreshToken(session.getId()));
     }
 
     private VerificationContextDTO validateVerificationCode(String email, String code) {

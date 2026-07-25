@@ -46,4 +46,9 @@ public class AuthController {
     public ResponseEntity<ResetPasswordResponseDTO> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO dto) {
         return ResponseEntity.ok(authService.resetPassword(dto));
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshTokenResponseDTO> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO dto) {
+        return ResponseEntity.ok(authService.refreshToken(dto));
+    }
 }

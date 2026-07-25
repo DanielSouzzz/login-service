@@ -41,6 +41,9 @@ public class User {
     @Column(nullable = false)
     private StatusUser status = StatusUser.PENDING;
 
+    @OneToMany(mappedBy = "user")
+    private List<Session> sessions = new ArrayList<>();
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
