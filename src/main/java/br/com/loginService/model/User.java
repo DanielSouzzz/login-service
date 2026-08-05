@@ -44,6 +44,10 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Session> sessions = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "application_id")
+    private Application application;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
