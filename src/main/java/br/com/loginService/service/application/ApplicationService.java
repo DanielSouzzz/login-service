@@ -35,7 +35,7 @@ public class ApplicationService {
         applicationRepository.save(application);
 
         return new CreateApplicationResponseDTO(application.getId(),
-                application.getHtml(),
+                application.getName(),
                 application.getOwnerEmail(),
                 apiKey);
     }
