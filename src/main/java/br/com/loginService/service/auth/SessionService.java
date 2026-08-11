@@ -9,8 +9,9 @@ import jakarta.transaction.Transactional;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.UUID;
+import java.util.Base64;
 
 @Service
 public class SessionService {
@@ -24,7 +25,7 @@ public class SessionService {
 
     public String create(User user, String ip) {
 
-        String refreshToken = UUID.randomUUID().toString();
+        String refreshToken = generateToken();
 
         Session session = new Session(
                 user,
@@ -60,10 +61,19 @@ public class SessionService {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
-        String refreshToken = UUID.randomUUID().toString();
+        String refreshToken = generateToken();
 
         session.setRefreshToken(DigestUtils.sha256Hex(refreshToken));
 
         return refreshToken;
+    }
+
+    private String generateToken() {
+        byte[] bytes = new byte[64];
+        new SecureRandom().nextBytes(bytes);
+
+        return Base64.getUrlEncoder()
+                        .withoutPadding()
+                        .encodeToString(bytes);
     }
 }
