@@ -41,7 +41,7 @@ public class ApplicationService {
     }
 
     private String generateApiKey() {
-            byte[] bytes = new byte[64];
+            byte[] bytes = new byte[256];
             new SecureRandom().nextBytes(bytes);
 
             return "sk_live_" +

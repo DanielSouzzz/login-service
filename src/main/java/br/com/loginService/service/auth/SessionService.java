@@ -69,7 +69,7 @@ public class SessionService {
     }
 
     private String generateToken() {
-        byte[] bytes = new byte[64];
+        byte[] bytes = new byte[256];
         new SecureRandom().nextBytes(bytes);
 
         return Base64.getUrlEncoder()

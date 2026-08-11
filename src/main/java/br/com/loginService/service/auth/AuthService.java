@@ -104,6 +104,7 @@ public class AuthService {
 
     @Transactional
     public VerificationCodeResponseDTO verifyCode(VerificationCodeRequestDTO dto) {
+        checkEmailRateLimit(dto.email());
 
         var verificationContextDTO = validateVerificationCode(dto.email(), dto.code());
 
@@ -133,6 +134,7 @@ public class AuthService {
 
     @Transactional
     public ResetPasswordResponseDTO resetPassword(ResetPasswordRequestDTO dto) {
+        checkEmailRateLimit(dto.email());
 
         var verificationContextDTO = validateVerificationCode(dto.email(), dto.code());
 
