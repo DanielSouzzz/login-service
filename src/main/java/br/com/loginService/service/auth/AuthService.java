@@ -196,7 +196,7 @@ public class AuthService {
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
 
         VerificationCode verificationCode = verificationCodeRepository
-                .findFirstByUserEmailAndUsedFalseOrderByCreatedAtDesc(email)
+                .findFirstByUserEmailAndApplicationIdAndUsedFalseOrderByCreatedAtDesc(email, applicationId)
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
 
         sessionService.revokeSessions(user.getId());
