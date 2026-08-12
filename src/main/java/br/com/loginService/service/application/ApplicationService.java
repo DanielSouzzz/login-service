@@ -6,6 +6,7 @@ import br.com.loginService.dto.external.VerificationCodeRequestDTO;
 import br.com.loginService.exception.ApplicationException;
 import br.com.loginService.exception.ErrorEnum;
 import br.com.loginService.infrastructure.security.OTPGenerator;
+import br.com.loginService.infrastructure.security.ratelimit.EmailRateLimiter;
 import br.com.loginService.model.Application;
 import br.com.loginService.model.VerificationCode;
 import br.com.loginService.repository.ApplicationRepository;
@@ -24,15 +25,19 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final VerificationCodeRepository verificationCodeRepository;
     private final EmailService emailService;
+    private final EmailRateLimiter emailRateLimiter;
 
 
-    public ApplicationService(ApplicationRepository applicationRepository, VerificationCodeRepository verificationCodeRepository, EmailService emailService) {
+    public ApplicationService(ApplicationRepository applicationRepository, VerificationCodeRepository verificationCodeRepository, EmailService emailService, EmailRateLimiter emailRateLimiter) {
         this.applicationRepository = applicationRepository;
         this.verificationCodeRepository = verificationCodeRepository;
         this.emailService = emailService;
+        this.emailRateLimiter = emailRateLimiter;
     }
 
     public CreateApplicationResponseDTO createApplication(@Valid CreateApplicationRequestDTO dto) {
+        emailRateLimiter.check(dto.email());
+
         if (applicationRepository.existsApplicationByOwnerEmail(dto.email())) {
             throw new ApplicationException(ErrorEnum.INVALID_CREDENTIALS);
         }
@@ -61,6 +66,7 @@ public class ApplicationService {
     }
 
     public CreateApplicationResponseDTO confirmAccount(@Valid VerificationCodeRequestDTO dto) {
+        emailRateLimiter.check(dto.email());
 
         Application application = applicationRepository.
                 findApplicationByOwnerEmail(dto.email())

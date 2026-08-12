@@ -1,4 +1,4 @@
-package br.com.loginService.infrastructure.ratelimit;
+package br.com.loginService.infrastructure.security.ratelimit;
 
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;

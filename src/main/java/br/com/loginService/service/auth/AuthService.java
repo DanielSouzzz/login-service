@@ -4,6 +4,7 @@ import br.com.loginService.dto.external.*;
 import br.com.loginService.dto.internal.VerificationContextDTO;
 import br.com.loginService.exception.ApplicationException;
 import br.com.loginService.exception.ErrorEnum;
+import br.com.loginService.infrastructure.security.ratelimit.EmailRateLimiter;
 import br.com.loginService.model.Application;
 import br.com.loginService.model.Session;
 import br.com.loginService.model.User;
@@ -44,6 +45,7 @@ public class AuthService {
     private final LettuceBasedProxyManager<String> proxyManager;
     private final SessionService sessionService;
     private final ApplicationRepository applicationRepository;
+    private final EmailRateLimiter emailRateLimiter;
 
 
     public AuthService(UserRepository repository,
@@ -51,18 +53,19 @@ public class AuthService {
                        VerificationCodeRepository verificationCodeRepository,
                        LettuceBasedProxyManager<String> proxyManager,
                        SessionService sessionService,
-                       ApplicationRepository applicationRepository){
+                       ApplicationRepository applicationRepository, EmailRateLimiter emailRateLimiter){
         this.userRepository = repository;
         this.emailService = emailService;
         this.verificationCodeRepository = verificationCodeRepository;
         this.proxyManager = proxyManager;
         this.sessionService = sessionService;
         this.applicationRepository = applicationRepository;
+        this.emailRateLimiter = emailRateLimiter;
         this.userPasswordEncoder = new BCryptPasswordEncoder();
     }
 
     public LoginResponseDTO tokenGenerate(@Valid LoginRequestDTO dto, String ip, String authorization) {
-        checkEmailRateLimit(dto.email());
+        emailRateLimiter.check(dto.email());
 
         Application application = applicationRepository.
                 findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
@@ -81,7 +84,7 @@ public class AuthService {
 
     @Transactional
     public RegisterResponseDTO createUser(RegisterRequestDTO dto, String authorization){
-        checkEmailRateLimit(dto.email());
+        emailRateLimiter.check(dto.email());
 
         Application application = applicationRepository.
                 findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
@@ -119,7 +122,7 @@ public class AuthService {
 
     @Transactional
     public VerificationCodeResponseDTO verifyCode(VerificationCodeRequestDTO dto, String authorization) {
-        checkEmailRateLimit(dto.email());
+        emailRateLimiter.check(dto.email());
 
         Application application = applicationRepository.
                 findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
@@ -134,7 +137,7 @@ public class AuthService {
     }
 
     public ForgotPasswordResponseDTO forgotPassword(ForgotPasswordRequestDTO dto, String authorization) {
-        checkEmailRateLimit(dto.email());
+        emailRateLimiter.check(dto.email());
 
         Application application = applicationRepository.
                 findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
@@ -158,7 +161,7 @@ public class AuthService {
 
     @Transactional
     public ResetPasswordResponseDTO resetPassword(ResetPasswordRequestDTO dto, String authorization) {
-        checkEmailRateLimit(dto.email());
+        emailRateLimiter.check(dto.email());
 
         Application application = applicationRepository.
                 findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
@@ -192,7 +195,7 @@ public class AuthService {
     }
 
     private VerificationContextDTO validateVerificationCode(String email, String code, long applicationId) {
-        checkEmailRateLimit(email);
+        emailRateLimiter.check(email);
 
         User user = userRepository.findUserByEmailAndApplicationId(email, applicationId)
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
@@ -217,24 +220,5 @@ public class AuthService {
         Strength strength = new Zxcvbn().measure(password);
 
         return strength.getScore() < 3;
-    }
-
-    private void checkEmailRateLimit(String email) {
-        try {
-            Bucket bucket = proxyManager.getProxy("rate:login:email:" + email, this::emailLimitConfig);
-
-            if (!bucket.tryConsume(1)) {
-                throw new ApplicationException(ErrorEnum.RATE_LIMIT_EXCEEDED);
-            }
-        } catch (RedisConnectionFailureException | RedisSystemException e) {
-            log.warn("Redis unavailable, skipping rate limit. email={}", email, e);
-        }
-    }
-
-    private BucketConfiguration emailLimitConfig() {
-        return BucketConfiguration.builder()
-                .addLimit(limit -> limit.capacity(10)
-                        .refillGreedy(10,Duration.ofMinutes(15)))
-                .build();
     }
 }
