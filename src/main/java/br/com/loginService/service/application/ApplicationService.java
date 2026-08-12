@@ -84,6 +84,7 @@ public class ApplicationService {
         String apiKey = generateApiKey();
 
         application.setApiKey(DigestUtils.sha256Hex(apiKey));
+        application.setEnabled(true);
         this.applicationRepository.save(application);
 
         return new CreateApplicationResponseDTO(
