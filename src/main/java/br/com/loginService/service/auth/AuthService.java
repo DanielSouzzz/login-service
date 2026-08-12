@@ -18,20 +18,15 @@ import br.com.loginService.service.security.AccessTokenService;
 import br.com.loginService.service.email.EmailService;
 import com.nulabinc.zxcvbn.Strength;
 import com.nulabinc.zxcvbn.Zxcvbn;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.data.redis.RedisConnectionFailureException;
-import org.springframework.data.redis.RedisSystemException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -213,7 +208,7 @@ public class AuthService {
 
     private boolean isValidCode(String code, VerificationCode verificationCode) {
         return code.equals(verificationCode.getCode())
-                || !verificationCode.getExpiresAt().isBefore(LocalDateTime.now());
+                && !verificationCode.getExpiresAt().isBefore(LocalDateTime.now());
     }
 
     private boolean isInvalidPassword(String password) {
