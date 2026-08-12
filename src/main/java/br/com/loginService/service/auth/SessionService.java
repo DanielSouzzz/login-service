@@ -76,4 +76,8 @@ public class SessionService {
                         .withoutPadding()
                         .encodeToString(bytes);
     }
+
+    public void revokeSessions(long userId) {
+        sessionRepository.revokeAllSessions(userId);
+    }
 }

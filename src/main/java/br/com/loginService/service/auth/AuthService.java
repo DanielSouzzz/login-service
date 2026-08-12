@@ -199,6 +199,8 @@ public class AuthService {
                 .findFirstByUserEmailAndUsedFalseOrderByCreatedAtDesc(email)
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
 
+        sessionService.revokeSessions(user.getId());
+
         if (!isValidCode(code, verificationCode)) {
             throw new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND);
         }
