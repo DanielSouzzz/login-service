@@ -104,6 +104,7 @@ public class AuthService {
         VerificationCode verificationCode = this.verificationCodeRepository.save(
                 new VerificationCode(
                         userRepository.save(user),
+                        null,
                         OTPGenerator.generate()
                 )
         );
@@ -144,6 +145,7 @@ public class AuthService {
         if (user.isPresent()) {
             VerificationCode verificationCode = this.verificationCodeRepository.save(
                     new VerificationCode(user.get(),
+                            null,
                             OTPGenerator.generate()
                     )
             );
@@ -208,7 +210,7 @@ public class AuthService {
 
     private boolean isValidCode(String code, VerificationCode verificationCode) {
         return code.equals(verificationCode.getCode())
-                && !verificationCode.getExpiresAt().isBefore(LocalDateTime.now());
+                || !verificationCode.getExpiresAt().isBefore(LocalDateTime.now());
     }
 
     private boolean isInvalidPassword(String password) {

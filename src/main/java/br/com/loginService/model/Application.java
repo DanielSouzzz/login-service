@@ -30,7 +30,7 @@ public class Application {
     @Column(name = "template_html", nullable = false, columnDefinition = "TEXT")
     private String html;
 
-    @Column(name = "api_key", unique = true, nullable = false)
+    @Column(name = "api_key", unique = true)
     private String apiKey;
 
     @Column(name = "owner_email", nullable = false, unique = true)
@@ -47,11 +47,10 @@ public class Application {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public Application(String name, String html, String ownerEmail, String apiKey) {
+    public Application(String name, String html, String ownerEmail, boolean enabled) {
         this.name = name;
         this.html = html;
         this.ownerEmail = ownerEmail;
-        this.enabled = true;
-        this.apiKey = apiKey;
+        this.enabled = enabled;
     }
 }

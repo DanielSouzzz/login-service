@@ -18,9 +18,13 @@ public class VerificationCode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "application_id")
+    private Application application;
 
     @Column(nullable = false, length = 6)
     private String code;
@@ -34,8 +38,9 @@ public class VerificationCode {
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    public VerificationCode(User user, String code) {
+    public VerificationCode(User user, Application application, String code) {
         this.user = user;
+        this.application = application;
         this.code = code;
     }
 
@@ -45,4 +50,6 @@ public class VerificationCode {
         this.expiresAt = this.createdAt.plusMinutes(15);
         this.used = false;
     }
+
+
 }
