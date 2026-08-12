@@ -23,32 +23,38 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponseDTO> createUser(@Valid @RequestBody RegisterRequestDTO dto){
-        return ResponseEntity.status(201).body(authService.createUser(dto));
+    public ResponseEntity<RegisterResponseDTO> createUser(@Valid @RequestBody RegisterRequestDTO dto,
+                                                          @RequestHeader("Authorization") String authorization){
+        return ResponseEntity.status(201).body(authService.createUser(dto, authorization));
     }
 
     @PostMapping("/verify-code")
-    public ResponseEntity<VerificationCodeResponseDTO> verifyCode(@Valid @RequestBody VerificationCodeRequestDTO dto) {
-        return ResponseEntity.status(201).body(authService.verifyCode(dto));
+    public ResponseEntity<VerificationCodeResponseDTO> verifyCode(@Valid @RequestBody VerificationCodeRequestDTO dto,
+                                                                  @RequestHeader("Authorization") String authorization) {
+        return ResponseEntity.status(201).body(authService.verifyCode(dto, authorization));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> logar(@Valid @RequestBody LoginRequestDTO dto) {
-            return ResponseEntity.ok(authService.tokenGenerate(dto, request.getRemoteAddr()));
+    public ResponseEntity<LoginResponseDTO> logar(@Valid @RequestBody LoginRequestDTO dto,
+                                                  @RequestHeader("Authorization") String authorization) {
+            return ResponseEntity.ok(authService.tokenGenerate(dto, request.getRemoteAddr(), authorization));
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ForgotPasswordResponseDTO> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO dto) {
-        return ResponseEntity.ok(authService.forgotPassword(dto));
+    public ResponseEntity<ForgotPasswordResponseDTO> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO dto,
+                                                                    @RequestHeader("Authorization") String authorization) {
+        return ResponseEntity.ok(authService.forgotPassword(dto, authorization));
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ResetPasswordResponseDTO> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO dto) {
-        return ResponseEntity.ok(authService.resetPassword(dto));
+    public ResponseEntity<ResetPasswordResponseDTO> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO dto,
+                                                                  @RequestHeader("Authorization") String authorization) {
+        return ResponseEntity.ok(authService.resetPassword(dto, authorization));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<RefreshTokenResponseDTO> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO dto) {
-        return ResponseEntity.ok(authService.refreshToken(dto));
+    public ResponseEntity<RefreshTokenResponseDTO> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO dto,
+                                                                @RequestHeader("Authorization") String authorization) {
+        return ResponseEntity.ok(authService.refreshToken(dto, authorization));
     }
 }

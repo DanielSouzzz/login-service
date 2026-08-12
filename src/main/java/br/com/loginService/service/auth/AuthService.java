@@ -4,11 +4,12 @@ import br.com.loginService.dto.external.*;
 import br.com.loginService.dto.internal.VerificationContextDTO;
 import br.com.loginService.exception.ApplicationException;
 import br.com.loginService.exception.ErrorEnum;
-import br.com.loginService.mapper.UserMapper;
+import br.com.loginService.model.Application;
 import br.com.loginService.model.Session;
 import br.com.loginService.model.User;
 import br.com.loginService.model.VerificationCode;
 import br.com.loginService.model.enums.StatusUser;
+import br.com.loginService.repository.ApplicationRepository;
 import br.com.loginService.repository.UserRepository;
 import br.com.loginService.repository.VerificationCodeRepository;
 import br.com.loginService.infrastructure.security.OTPGenerator;
@@ -22,6 +23,7 @@ import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.RedisSystemException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -41,24 +43,32 @@ public class AuthService {
     private final VerificationCodeRepository verificationCodeRepository;
     private final LettuceBasedProxyManager<String> proxyManager;
     private final SessionService sessionService;
+    private final ApplicationRepository applicationRepository;
 
 
     public AuthService(UserRepository repository,
                        EmailService emailService,
                        VerificationCodeRepository verificationCodeRepository,
-                       LettuceBasedProxyManager<String> proxyManager, SessionService sessionService){
+                       LettuceBasedProxyManager<String> proxyManager,
+                       SessionService sessionService,
+                       ApplicationRepository applicationRepository){
         this.userRepository = repository;
         this.emailService = emailService;
         this.verificationCodeRepository = verificationCodeRepository;
         this.proxyManager = proxyManager;
         this.sessionService = sessionService;
+        this.applicationRepository = applicationRepository;
         this.userPasswordEncoder = new BCryptPasswordEncoder();
     }
 
-    public LoginResponseDTO tokenGenerate(@Valid LoginRequestDTO dto, String ip) {
+    public LoginResponseDTO tokenGenerate(@Valid LoginRequestDTO dto, String ip, String authorization) {
         checkEmailRateLimit(dto.email());
 
-        User user = userRepository.findUserByEmailAndActiveStatus(dto.email())
+        Application application = applicationRepository.
+                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
+
+        User user = userRepository.findUserByEmailAndActiveStatusAndApplicationId(dto.email(), application.getId())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
         if (!this.userPasswordEncoder.matches(dto.password(), user.getPassword())) {
@@ -70,8 +80,12 @@ public class AuthService {
     }
 
     @Transactional
-    public RegisterResponseDTO createUser(RegisterRequestDTO dto){
+    public RegisterResponseDTO createUser(RegisterRequestDTO dto, String authorization){
         checkEmailRateLimit(dto.email());
+
+        Application application = applicationRepository.
+                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
         if (userRepository.existsUserByEmail(dto.email())) {
             throw new ApplicationException(ErrorEnum.INVALID_CREDENTIALS);
@@ -81,15 +95,15 @@ public class AuthService {
             throw new ApplicationException(ErrorEnum.WEAK_PASSWORD);
         }
 
-        User user = UserMapper.toEntity(dto);
-
-        user.setPassword(this.userPasswordEncoder.encode(user.getPassword()));
-
-        User newUser = userRepository.save(user);
+        User user = userRepository.
+                save(new User(dto.name(),
+                        dto.email(),
+                        this.userPasswordEncoder.encode(dto.password()),
+                        application));
 
         VerificationCode verificationCode = this.verificationCodeRepository.save(
                 new VerificationCode(
-                        newUser,
+                        userRepository.save(user),
                         OTPGenerator.generate()
                 )
         );
@@ -97,16 +111,20 @@ public class AuthService {
         emailService.sendConfirmationEmail(dto.email(), verificationCode.getCode());
 
         return new RegisterResponseDTO(
-                newUser.getId(),
-                newUser.getEmail(),
+                user.getId(),
+                user.getEmail(),
                 "User created. Check your email to confirm your account.");
     }
 
     @Transactional
-    public VerificationCodeResponseDTO verifyCode(VerificationCodeRequestDTO dto) {
+    public VerificationCodeResponseDTO verifyCode(VerificationCodeRequestDTO dto, String authorization) {
         checkEmailRateLimit(dto.email());
 
-        var verificationContextDTO = validateVerificationCode(dto.email(), dto.code());
+        Application application = applicationRepository.
+                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
+
+        var verificationContextDTO = validateVerificationCode(dto.email(), dto.code(), application.getId());
 
         verificationContextDTO.verificationCode().setUsed(true);
         verificationContextDTO.user().setStatus(StatusUser.ACTIVE);
@@ -114,10 +132,14 @@ public class AuthService {
         return new VerificationCodeResponseDTO("User successfully activated.");
     }
 
-    public ForgotPasswordResponseDTO forgotPassword(ForgotPasswordRequestDTO dto) {
+    public ForgotPasswordResponseDTO forgotPassword(ForgotPasswordRequestDTO dto, String authorization) {
         checkEmailRateLimit(dto.email());
 
-        Optional<User> user = userRepository.findUserByEmail(dto.email());
+        Application application = applicationRepository.
+                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
+
+        Optional<User> user = userRepository.findUserByEmailAndApplicationId(dto.email(), application.getId());
 
         if (user.isPresent()) {
             VerificationCode verificationCode = this.verificationCodeRepository.save(
@@ -133,10 +155,14 @@ public class AuthService {
     }
 
     @Transactional
-    public ResetPasswordResponseDTO resetPassword(ResetPasswordRequestDTO dto) {
+    public ResetPasswordResponseDTO resetPassword(ResetPasswordRequestDTO dto, String authorization) {
         checkEmailRateLimit(dto.email());
 
-        var verificationContextDTO = validateVerificationCode(dto.email(), dto.code());
+        Application application = applicationRepository.
+                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
+
+        var verificationContextDTO = validateVerificationCode(dto.email(), dto.code(), application.getId());
 
         if (isInvalidPassword(dto.newPassword())) {
             throw new ApplicationException(ErrorEnum.WEAK_PASSWORD);
@@ -148,20 +174,25 @@ public class AuthService {
         return new ResetPasswordResponseDTO("Password reset completed with successfully");
     }
 
-    public RefreshTokenResponseDTO refreshToken(@Valid RefreshTokenRequestDTO dto) {
+    public RefreshTokenResponseDTO refreshToken(@Valid RefreshTokenRequestDTO dto, String authorization) {
+
+        Application application = applicationRepository.
+                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
+
         Session session = sessionService.validate(dto.refresh_token());
 
-        User user = userRepository.findUserByIdAndActiveStatus(session.getUser().getId())
+        User user = userRepository.findUserByIdAndActiveStatusAndApplicationId(session.getUser().getId(), application.getId())
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
         return new RefreshTokenResponseDTO(AccessTokenService.createAcessToken(user),
                 sessionService.refreshToken(session.getId()));
     }
 
-    private VerificationContextDTO validateVerificationCode(String email, String code) {
+    private VerificationContextDTO validateVerificationCode(String email, String code, long applicationId) {
         checkEmailRateLimit(email);
 
-        User user = userRepository.findUserByEmail(email)
+        User user = userRepository.findUserByEmailAndApplicationId(email, applicationId)
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
 
         VerificationCode verificationCode = verificationCodeRepository
@@ -200,8 +231,8 @@ public class AuthService {
 
     private BucketConfiguration emailLimitConfig() {
         return BucketConfiguration.builder()
-                .addLimit(limit -> limit.capacity(5)
-                        .refillGreedy(5,Duration.ofMinutes(15)))
+                .addLimit(limit -> limit.capacity(10)
+                        .refillGreedy(10,Duration.ofMinutes(15)))
                 .build();
     }
 }
