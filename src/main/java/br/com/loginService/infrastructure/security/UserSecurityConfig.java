@@ -21,7 +21,8 @@ public class UserSecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/auth/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/**",
+                                "/api/application/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new UsersecurityFilter(), UsernamePasswordAuthenticationFilter.class);
