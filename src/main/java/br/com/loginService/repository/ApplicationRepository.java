@@ -10,7 +10,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     boolean existsApplicationByOwnerEmail(@Param("email") String email);
 
-    Optional<Application> findApplicationByApiKey(String apiKey);
+    Optional<Application> findApplicationByApiKeyAndEnabled(String apiKey);
 
     Optional<Application> findApplicationByOwnerEmail(@Param("email") String email);
 }

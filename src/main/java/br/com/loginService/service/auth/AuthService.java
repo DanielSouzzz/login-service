@@ -63,7 +63,7 @@ public class AuthService {
         emailRateLimiter.check(dto.email());
 
         Application application = applicationRepository.
-                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                findApplicationByApiKeyAndEnabled(DigestUtils.sha256Hex(authorization))
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
         User user = userRepository.findUserByEmailAndActiveStatusAndApplicationId(dto.email(), application.getId())
@@ -82,7 +82,7 @@ public class AuthService {
         emailRateLimiter.check(dto.email());
 
         Application application = applicationRepository.
-                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                findApplicationByApiKeyAndEnabled(DigestUtils.sha256Hex(authorization))
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
         if (userRepository.existsUserByEmail(dto.email())) {
@@ -120,7 +120,7 @@ public class AuthService {
         emailRateLimiter.check(dto.email());
 
         Application application = applicationRepository.
-                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                findApplicationByApiKeyAndEnabled(DigestUtils.sha256Hex(authorization))
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
         var verificationContextDTO = validateVerificationCode(dto.email(), dto.code(), application.getId());
@@ -135,7 +135,7 @@ public class AuthService {
         emailRateLimiter.check(dto.email());
 
         Application application = applicationRepository.
-                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                findApplicationByApiKeyAndEnabled(DigestUtils.sha256Hex(authorization))
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
         Optional<User> user = userRepository.findUserByEmailAndApplicationId(dto.email(), application.getId());
@@ -159,7 +159,7 @@ public class AuthService {
         emailRateLimiter.check(dto.email());
 
         Application application = applicationRepository.
-                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                findApplicationByApiKeyAndEnabled(DigestUtils.sha256Hex(authorization))
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
         var verificationContextDTO = validateVerificationCode(dto.email(), dto.code(), application.getId());
@@ -179,7 +179,7 @@ public class AuthService {
     public RefreshTokenResponseDTO refreshToken(@Valid RefreshTokenRequestDTO dto, String authorization) {
 
         Application application = applicationRepository.
-                findApplicationByApiKey(DigestUtils.sha256Hex(authorization))
+                findApplicationByApiKeyAndEnabled(DigestUtils.sha256Hex(authorization))
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.INVALID_CREDENTIALS));
 
         Session session = sessionService.validate(dto.refresh_token());
