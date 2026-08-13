@@ -33,7 +33,7 @@ public class Application {
     @Column(name = "api_key", unique = true)
     private String apiKey;
 
-    @Column(name = "owner_email", nullable = false, unique = true)
+    @Column(name = "owner_email", nullable = false, unique = true, length = 254)
     private String ownerEmail;
 
     @Column(nullable = false)
