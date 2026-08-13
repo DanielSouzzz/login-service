@@ -102,7 +102,7 @@ public class AuthService {
         VerificationCode verificationCode = this.verificationCodeRepository.save(
                 new VerificationCode(
                         user,
-                        null,
+                        application,
                         OTPGenerator.generate()
                 )
         );
@@ -143,7 +143,7 @@ public class AuthService {
         if (user.isPresent()) {
             VerificationCode verificationCode = this.verificationCodeRepository.save(
                     new VerificationCode(user.get(),
-                            null,
+                            application,
                             OTPGenerator.generate()
                     )
             );
@@ -170,6 +170,8 @@ public class AuthService {
 
         verificationContextDTO.user().setPassword(this.userPasswordEncoder.encode(dto.newPassword()));
         verificationContextDTO.verificationCode().setUsed(true);
+
+        sessionService.revokeSessions(verificationContextDTO.user().getId());
 
         return new ResetPasswordResponseDTO("Password reset completed with successfully");
     }
@@ -198,8 +200,6 @@ public class AuthService {
         VerificationCode verificationCode = verificationCodeRepository
                 .findFirstByUserEmailAndApplicationIdAndUsedFalseOrderByCreatedAtDesc(email, applicationId)
                 .orElseThrow(() -> new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND));
-
-        sessionService.revokeSessions(user.getId());
 
         if (!isValidCode(code, verificationCode)) {
             throw new ApplicationException(ErrorEnum.RESOURCE_NOT_FOUND);
