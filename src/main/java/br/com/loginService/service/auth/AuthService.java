@@ -101,7 +101,7 @@ public class AuthService {
 
         VerificationCode verificationCode = this.verificationCodeRepository.save(
                 new VerificationCode(
-                        userRepository.save(user),
+                        user,
                         null,
                         OTPGenerator.generate()
                 )
